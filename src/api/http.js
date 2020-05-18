@@ -21,7 +21,7 @@ if (process.env.NODE_ENV === 'development') {
 export function get (url, params) {
   return new Promise((resolve, reject) => {
     axios.get(url, {
-      params: params
+      params
     })
       .then(res => {
         resolve(res.data)
