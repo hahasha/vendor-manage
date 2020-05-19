@@ -103,7 +103,7 @@ export default {
         this.$message.error('上传图片只能是 JPG 或 PNG 格式!')
       }
       if (!isLt2M) {
-        this.$message.error('上传头像图片大小不能超过 2MB!')
+        this.$message.error('上传图片大小不能超过 2MB!')
       }
       return isType && isLt2M
     },

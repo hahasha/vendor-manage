@@ -80,7 +80,7 @@
       layout="total, sizes, prev, pager, next"
       :total="totalCount">
     </el-pagination>
-    <el-dialog title="修改商品信息" :visible.sync="dialogFormVisible">
+    <el-dialog title="修改商品信息" :visible.sync="dialogFormVisible" @close="handleDialogClose">
       <el-form :model="dialogData">
         <el-form-item label="商品名称" :label-width="formLabelWidth" required>
           <el-input v-model="dialogData.name" autocomplete="off"></el-input>
@@ -123,16 +123,10 @@
           </el-upload>
         </el-form-item>
         <el-form-item label="商品详情图" :label-width="formLabelWidth">
-          <!-- <el-upload
-            class="uploaders"
-            action=""
-            :on-preview="handlePreview"
-            :on-remove="handleRemove"
-            :file-list="fileList"
-            list-type="picture">
-          </el-upload> -->
-          <!-- <imgUpload v-model="fileList"/> -->
-          <imgDrag :fileList="fileList"></imgDrag>
+          <imgDrag
+            :fileList="detailList"
+            @dragEvent="getNewList"
+            ></imgDrag>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -144,9 +138,8 @@
 </template>
 
 <script>
-// import imgUpload from '@/components/imgUpload/imgUpload'
 import imgDrag from '@/components/imgDrag/imgDrag'
-import { getProducts, getCategories, getThemes } from '@/api/api'
+import { getProducts, getCategories, getThemes, updateProduct, upLoadImg } from '@/api/api'
 import { baseImgUrl } from '@/api/http'
 function compareFn (key) {
   return function (a, b) {
@@ -164,10 +157,11 @@ export default {
       totalCount: 0,
       dialogFormVisible: false,
       dialogData: {},
+      detailList: [], // 商品详情图列表
       categories: [],
       themes: [],
-      fileList: [],
       formLabelWidth: '120px',
+      newImgList: [], // 接受子组件修改后的商品详情列表
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -192,26 +186,64 @@ export default {
       this.currentPage = val
       this.getProducts(val, this.pageSize)
     },
-    handleUpload () {},
-    handleBeforupload () {},
-    handleRemove (file, fileList) {
-      console.log(file, fileList)
+    getNewList (newList) {
+      this.newImgList = newList
     },
-    handlePreview (file) {
-      console.log(file)
+    handleUpload (file) {
+      var formdata = new FormData()
+      formdata.append('file', file.file)
+      upLoadImg(formdata).then(res => {
+        if (res.errcode === 0 && res.image) {
+          // 更新商品展示图信息
+          this.dialogData.main_img_url = res.image.url
+          this.dialogData.img_id = res.image.id
+          this.dialogData.imageUrl = baseImgUrl + res.image.url
+        }
+      })
     },
-    submitForm () {},
+    handleBeforupload (file) {
+      const isType = file.type === 'image/jpeg' || file.type === 'image/png'
+      const isLt2M = file.size / 1024 / 1024 < 2
+      if (!isType) {
+        this.$message.error('上传图片只能是 JPG 或 PNG 格式!')
+      }
+      if (!isLt2M) {
+        this.$message.error('上传图片大小不能超过 2MB!')
+      }
+      return isType && isLt2M
+    },
+    submitForm () {
+      this.dialogFormVisible = false
+      const newCategory = this.categories.filter(item => item.name === this.dialogData.category)[0]
+      const newThemes = this.themes.filter(item => this.dialogData.themeArr.some(theme => theme === item.name))
+      const { id, price, name, stock, summary } = this.dialogData
+      updateProduct({
+        id,
+        price,
+        name,
+        stock,
+        summary,
+        img_id: this.dialogData.img_id,
+        main_img_url: this.dialogData.main_img_url,
+        category_id: newCategory.id,
+        themeList: newThemes,
+        imgList: this.newImgList
+      }).then(res => {
+        if (res.errcode === 0) {
+          this.$message.success('修改成功')
+        } else {
+          this.$message.eeror('修改失败')
+        }
+      })
+    },
+    handleDialogClose () {
+      // dialog关闭时触发，用来清空detailList数据
+      this.detailList.splice(0, this.detailList.length) // 数组的响应式更新
+    },
     handleEdit (index, row) {
       this.dialogFormVisible = true
       this.dialogData = row
-      row.images.forEach(item => {
-        const obj = {}
-        obj.id = item.id
-        obj.order = item.orderBy.order
-        obj.url = baseImgUrl + item.url
-        this.fileList.push(obj)
-      })
-      this.fileList = this.fileList.sort(compareFn('order'))
+      this.getdetailList(row.images) // 打开dialog时，获取格式化的detailList
     },
     handleDelete (index, row) {},
     getProducts (page, limit) {
@@ -225,9 +257,9 @@ export default {
           res.products.rows.forEach(item => {
             item.themeArr = []
             item.category = item.category.name
-            item.imageUrl = baseImgUrl + item.main_img_url
+            item.imageUrl = baseImgUrl + item.main_img_url // 格式化商品展示图url
             item.themes.forEach(theme => {
-              item.themeArr.push(theme.name)
+              item.themeArr.push(theme.name) // 格式化专题数组
             })
             this.productData.push(item)
           })
@@ -247,10 +279,20 @@ export default {
           this.themes = res.themes
         }
       })
+    },
+    getdetailList (imgList) {
+      imgList.forEach(item => {
+        const img = {
+          id: item.id,
+          order: item.orderBy.order,
+          url: baseImgUrl + item.url
+        }
+        this.detailList.push(img)
+      })
+      this.detailList.sort(compareFn('order'))
     }
   },
   components: {
-    // imgUpload,
     imgDrag
   }
 }

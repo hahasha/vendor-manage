@@ -47,6 +47,7 @@
 import { upLoadImg } from '@/api/api'
 import { baseImgUrl } from '@/api/http'
 import draggable from 'vuedraggable'
+
 export default {
   name: 'ImgDrag',
   display: 'Transitions',
@@ -69,7 +70,7 @@ export default {
     fileList: {
       type: Array,
       default: function () {
-        return {}
+        return []
       }
     }
   },
@@ -99,7 +100,17 @@ export default {
         })
       }).catch(() => {}) // 添加catch防止控制台报错Uncaught (in promise) cancel，因为$confirm方法内置promise
     },
-    handleBeforupload () {},
+    handleBeforupload (file) {
+      const isType = file.type === 'image/jpeg' || file.type === 'image/png'
+      const isLt2M = file.size / 1024 / 1024 < 2
+      if (!isType) {
+        this.$message.error('上传图片只能是 JPG 或 PNG 格式!')
+      }
+      if (!isLt2M) {
+        this.$message.error('上传图片大小不能超过 2MB!')
+      }
+      return isType && isLt2M
+    },
     handleUpload (file) {
       var formdata = new FormData()
       formdata.append('file', file.file)
@@ -122,11 +133,13 @@ export default {
       e.target.classList.remove('hideShadow')
     },
     reNewList (list) {
-      console.log(list)
       list.forEach((item, index) => {
-        // console.log(item.order)
-        // console.log(index)
+        if (item.order !== index + 1) {
+          item.order = index + 1
+        }
       })
+      this.list = list
+      this.$emit('dragEvent', this.list)
     }
   },
   watch: {
