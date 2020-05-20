@@ -139,7 +139,7 @@
 
 <script>
 import imgDrag from '@/components/imgDrag/imgDrag'
-import { getProducts, getCategories, getThemes, updateProduct, upLoadImg } from '@/api/api'
+import { getProducts, getCategories, getThemes, updateProduct, upLoadImg, deleteProduct } from '@/api/api'
 import { baseImgUrl } from '@/api/http'
 function compareFn (key) {
   return function (a, b) {
@@ -245,7 +245,22 @@ export default {
       this.dialogData = row
       this.getdetailList(row.images) // 打开dialog时，获取格式化的detailList
     },
-    handleDelete (index, row) {},
+    handleDelete (index, row) {
+      this.$confirm('确定删除该商品吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteProduct({
+          id: row.id
+        }).then(res => {
+          if (res.errcode === 0) {
+            this.getProducts()
+            this.$message.success('删除成功')
+          }
+        })
+      }).catch(() => {})
+    },
     getProducts (page, limit) {
       this.productData = []
       getProducts({

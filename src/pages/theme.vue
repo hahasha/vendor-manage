@@ -6,17 +6,17 @@
       >
       <el-table-column
         type="index"
-        width="50">
+        width="80">
       </el-table-column>
       <el-table-column
         property="name"
         label="专题名称"
-        width="120">
+        width="200">
       </el-table-column>
       <el-table-column
         property="description"
         label="描述"
-        width="400">
+        width="300">
       </el-table-column>
       <el-table-column label="操作">
         <template slot-scope="scope">
@@ -38,7 +38,7 @@
         <el-form-item label="描述" :label-width="formLabelWidth">
           <el-input v-model="dialogData.description" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="分类主题图" :label-width="formLabelWidth">
+        <el-form-item label="专题展示图" :label-width="formLabelWidth">
           <el-upload
             action=""
             class="img-uploader"
@@ -47,7 +47,20 @@
             :headers="headers"
             :before-upload="handleBeforupload"
             >
-            <img v-if="dialogData.imageUrl" :src="dialogData.imageUrl" class="img">
+            <img v-if="dialogData.topicImgUrl" :src="dialogData.topicImgUrl" class="img">
+            <i v-else class="el-icon-plus img-uploader-icon"></i>
+          </el-upload>
+        </el-form-item>
+        <el-form-item label="专题主题图" :label-width="formLabelWidth">
+          <el-upload
+            action=""
+            class="img-uploader"
+            :http-request="handleUpload"
+            :show-file-list="false"
+            :headers="headers"
+            :before-upload="handleBeforupload"
+            >
+            <img v-if="dialogData.headImgUrl" :src="dialogData.headImgUrl" class="img">
             <i v-else class="el-icon-plus img-uploader-icon"></i>
           </el-upload>
         </el-form-item>
@@ -61,20 +74,65 @@
 </template>
 
 <script>
-import { getThemes } from '@/api/api'
+import { getThemes, deleteTheme } from '@/api/api'
+import { baseImgUrl } from '@/api/http'
 export default {
   data () {
     return {
       themeData: [],
       dialogData: {},
-      dialogFormVisible: false
+      dialogFormVisible: false,
+      formLabelWidth: '120px',
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
     }
   },
   created () {
-    getThemes().then(res => {
-      console.log(res)
-    })
+    this.getThemes()
   },
-  methods: {}
+  methods: {
+    handleEdit (index, row) {
+      this.dialogFormVisible = true
+      this.dialogData = row
+      console.log(this.dialogData)
+    },
+    handleDelete (index, row) {
+      this.$confirm('确定删除该专题吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteTheme({
+          id: row.id
+        }).then(res => {
+          if (res.errcode === 0) {
+            this.$message.success('删除成功')
+            this.getThemes()
+          }
+        })
+      })
+    },
+    handleUpload () {},
+    handleBeforupload () {},
+    submitForm () {},
+    getThemes () {
+      this.themeData = []
+      getThemes().then(res => {
+        if (res.errcode === 0) {
+          res.themes.forEach(item => {
+            item.headImgUrl = baseImgUrl + item.head_img.url
+            item.topicImgUrl = baseImgUrl + item.topic_img.url
+            this.themeData.push(item)
+          })
+        }
+      })
+    }
+  }
 }
 </script>
+
+<style lang="stylus" scoped>
+  .img
+    width: 100%
+</style>

@@ -15,11 +15,17 @@ export const deleteCategory = params => post('/v1/category/delete', params)
 // 获取专题列表
 export const getThemes = params => get('/v1/theme', params)
 
+// 删除专题
+export const deleteTheme = params => post('/v1/theme/delete', params)
+
 // 获取产品列表
 export const getProducts = params => get('/v1/product', params)
 
 // 修改产品信息
 export const updateProduct = params => post('/v1/product/update', params)
+
+// 删除产品
+export const deleteProduct = params => post('/v1/product/delete', params)
 
 // 上传图片
 export const upLoadImg = params => postForm('/v1/image/upload', params)

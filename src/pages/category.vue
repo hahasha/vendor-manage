@@ -122,12 +122,18 @@ export default {
       this.dialogFormVisible = true
     },
     handleDelete (index, row) {
-      deleteCategory({
-        id: row.id
-      }).then(res => {
-        this.getCategories()
-        this.$message.success('删除成功')
-      })
+      this.$confirm('确定删除该分类吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteCategory({
+          id: row.id
+        }).then(res => {
+          this.getCategories()
+          this.$message.success('删除成功')
+        })
+      }).catch(() => {})
     },
     getCategories () {
       this.categoryData = []

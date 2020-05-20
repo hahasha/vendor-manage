@@ -11,13 +11,13 @@
       <transition-group type="transition" :name="!drag ? 'flip-list' : null">
         <li
           class="list-group-item"
-          v-for="(item, index) in list"
-          :key="item.order"
+          v-for="(item, index) in showList"
+          :key="item.id"
         >
           <el-image :src="item.url" :preview-src-list="[item.url]"></el-image>
           <span class="shadow" ref="shadow">
             <i class="el-icon-zoom-in icon-preview" @click="handlePreview(item)"></i>
-            <i class="el-icon-delete icon-remove" @click="handleRemove(index)"></i>
+            <i class="el-icon-delete icon-remove" @click="handleRemove(item, index)"></i>
           </span>
         </li>
       </transition-group>
@@ -82,6 +82,9 @@ export default {
         disabled: false,
         ghostClass: 'ghost'
       }
+    },
+    showList () {
+      return this.list.filter(item => item.order !== -1)
     }
   },
   methods: {
@@ -89,15 +92,14 @@ export default {
       this.dialogVisible = true
       this.dialogImageUrl = item.url
     },
-    handleRemove (index) {
+    handleRemove (item, index) {
       this.$confirm('确定删除该图片?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.list = this.list.filter((v, i) => {
-          return i !== index
-        })
+        item.order = -1
+        this.list.splice(index, 1, item)
       }).catch(() => {}) // 添加catch防止控制台报错Uncaught (in promise) cancel，因为$confirm方法内置promise
     },
     handleBeforupload (file) {
@@ -133,13 +135,15 @@ export default {
       e.target.classList.remove('hideShadow')
     },
     reNewList (list) {
+      var order = 1
       list.forEach((item, index) => {
-        if (item.order !== index + 1) {
-          item.order = index + 1
+        if (item.order !== -1) {
+          item.order = order
+          order++
         }
       })
       this.list = list
-      this.$emit('dragEvent', this.list)
+      this.$emit('dragEvent', list)
     }
   },
   watch: {
