@@ -69,9 +69,7 @@ export default {
           }).then(res => {
             if (res.errcode === 0) {
               this.$message.success('添加成功')
-              this.formData.name = ''
-              this.formData.description = ''
-              this.formData.imageUrl = ''
+              this.$router.push('/manage/category')
             } else {
               this.$message.error('添加失败')
             }

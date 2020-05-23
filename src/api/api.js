@@ -30,6 +30,9 @@ export const getProducts = params => get('/v1/product', params)
 // 修改产品信息
 export const updateProduct = params => post('/v1/product/update', params)
 
+// 添加商品
+export const addProduct = params => post('/v1/product/add', params)
+
 // 删除产品
 export const deleteProduct = params => post('/v1/product/delete', params)
 

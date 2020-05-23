@@ -50,14 +50,7 @@
 <script>
 export default {
   data () {
-    const item = {
-      date: '2016-05-02',
-      name: '王小虎',
-      address: '上海市普陀区金沙江路 1518 弄'
-    }
     return {
-      defaultActive: 'home',
-      tableData: Array(20).fill(item)
     }
   },
   created () {
@@ -76,14 +69,13 @@ export default {
 @import '~@/assets/css/index'
 .manage-container
   min-height 100%
-  min-height 100vw
   .nav-bar
     min-height 100%
   .el-header
     display flex
     align-items center
     justify-content space-between
-    height 60px
+    height 8vh
     background-color #f0f2f5
     color #333
     border-bottom 1px solid #dfe1e5
@@ -92,4 +84,6 @@ export default {
       width 36px
       height 36px
       border-radius 50%
+  .el-main
+    height 92vh
 </style>

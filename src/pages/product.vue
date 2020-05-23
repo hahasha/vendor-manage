@@ -92,7 +92,7 @@
           <el-input v-model="dialogData.stock" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="商品分类" :label-width="formLabelWidth">
-          <el-select v-model="dialogData.category" placeholder="请选择活动区域">
+          <el-select v-model="dialogData.category" placeholder="请选择商品分类">
             <el-option
               v-for="item in categories"
               :key="item.id"

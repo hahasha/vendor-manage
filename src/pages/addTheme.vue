@@ -1,5 +1,5 @@
 <template>
-  <div class="add-category-content">
+  <div class="add-theme-content">
     <el-form :model="formData" :rules="rules" ref="formData" label-width="100px" class="formData">
       <el-form-item label="专题名称" prop="name">
         <el-input v-model="formData.name"></el-input>
@@ -89,11 +89,7 @@ export default {
           }).then(res => {
             if (res.errcode === 0) {
               this.$message.success('添加成功')
-              this.formData.name = ''
-              this.formData.description = ''
-              this.formData.topicImgUrl = ''
-              this.formData.headImgUrl = ''
-              this.$refs.formData.scrollTop = 0
+              this.$router.push('/manage/theme')
             } else {
               this.$message.error('添加失败')
             }
@@ -143,7 +139,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-.add-category-content
+.add-theme-content
   display flex
   justify-content center
   .formData
