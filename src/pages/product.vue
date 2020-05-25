@@ -243,7 +243,7 @@ export default {
     handleEdit (index, row) {
       this.dialogFormVisible = true
       this.dialogData = row
-      this.getdetailList(row.images) // 打开dialog时，获取格式化的detailList
+      this.getdetailList(row.details) // 打开dialog时，获取格式化的detailList
     },
     handleDelete (index, row) {
       this.$confirm('确定删除该商品吗?', '提示', {
