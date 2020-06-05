@@ -36,9 +36,16 @@
     <el-container>
       <el-header>
         <el-breadcrumb separator-class="el-icon-arrow-right">
-          <el-breadcrumb-item v-for="(item,index) in $route.meta" :key="index">{{item}}</el-breadcrumb-item>
+          <el-breadcrumb-item v-for="(item,index) in $route.meta.title" :key="index">{{item}}</el-breadcrumb-item>
         </el-breadcrumb>
-        <img class="avatar" src="../../public/images/avatar.jpg" alt="">
+        <el-dropdown @command="logout">
+        <span class="el-dropdown-link">
+          <img class="avatar" src="../../public/images/avatar.jpg" alt="">
+        </span>
+        <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item command="logout">退出登录</el-dropdown-item>
+        </el-dropdown-menu>
+      </el-dropdown>
       </el-header>
       <el-main>
         <router-view></router-view>
@@ -48,19 +55,36 @@
 </template>
 
 <script>
+import { mapMutations } from 'vuex'
 export default {
   data () {
     return {
     }
   },
   created () {
-    this.defaultActive = this.$route.name
+    console.log()
+    // this.defaultActive = this.$route.name
+  },
+  computed: {
+    defaultActive () {
+      return this.$route.name
+    }
   },
   methods: {
     selectHandler (index) {
-      const path = index === 'home' ? '' : '/' + index
-      this.$router.push('/manage' + path)
-    }
+      const path = index === 'home' ? '' : index
+      this.$router.push('/' + path)
+    },
+    logout (command) {
+      if (command === 'logout') {
+        this.setToken(null)
+        this.$router.push('login')
+        this.$message.success('退出成功')
+      }
+    },
+    ...mapMutations({
+      setToken: 'SET_TOKEN'
+    })
   }
 }
 </script>
@@ -86,4 +110,5 @@ export default {
       border-radius 50%
   .el-main
     height 92vh
+    overflow-x hidden
 </style>

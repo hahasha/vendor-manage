@@ -38,3 +38,21 @@ export const deleteProduct = params => post('/v1/product/delete', params)
 
 // 上传图片
 export const upLoadImg = params => postForm('/v1/image/upload', params)
+
+// 获取用户总数
+export const getUserCount = params => get('/v1/user/count', params)
+
+// 获取管理员总数
+export const getAdminCount = params => get('/v1/admin/count', params)
+
+// 获取订单总数
+export const getOrderCount = params => get('/v1/order/count', params)
+
+// 获取最近的订单数量
+export const getRecentOrderCount = params => get('/v1/order/recent', params)
+
+// 获取最近新增的用户数量
+export const getRecentUserCount = params => get('/v1/user/recent', params)
+
+// 获取最近新增的管理员数量
+export const getRecentAdminCount = params => get('/v1/admin/recent', params)

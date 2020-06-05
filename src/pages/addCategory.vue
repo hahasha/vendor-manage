@@ -15,7 +15,6 @@
           :show-file-list="false"
           :headers="headers"
           :before-upload="handleBeforupload"
-          :limit="1"
           accept=".jpg,.jpeg,.png,.gif"
           >
           <img v-if="formData.imageUrl" :src="formData.imageUrl" class="img">
@@ -69,7 +68,7 @@ export default {
           }).then(res => {
             if (res.errcode === 0) {
               this.$message.success('添加成功')
-              this.$router.push('/manage/category')
+              this.$router.push('/category')
             } else {
               this.$message.error('添加失败')
             }

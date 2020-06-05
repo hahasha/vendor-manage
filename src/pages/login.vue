@@ -49,9 +49,9 @@ export default {
             if (errcode === 0) {
               this.setToken(token)
               this.$message.success('登录成功')
-              this.$router.push('/manage')
+              this.$router.push('/')
             } else {
-              this.$message.error('登录失败')
+              this.$message.error('密码错误')
             }
           })
         }
@@ -69,7 +69,7 @@ export default {
 
 .login-page {
   background: $color-background
-  min-height: 100%
+  min-height: 100vh
 }
 .login-container {
   position: fixed

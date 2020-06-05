@@ -5,10 +5,10 @@
         <el-input v-model="formData.name"></el-input>
       </el-form-item>
       <el-form-item label="商品价格" prop="price">
-        <el-input v-model="formData.price"></el-input>
+        <el-input v-model.number="formData.price"></el-input>
       </el-form-item>
       <el-form-item label="商品库存" prop="stock">
-        <el-input v-model="formData.stock"></el-input>
+        <el-input v-model.number="formData.stock"></el-input>
       </el-form-item>
       <el-form-item label="商品分类" prop="category">
         <el-select v-model="formData.category" placeholder="请选择商品分类" @change="handleSelect">
@@ -36,7 +36,6 @@
           :show-file-list="false"
           :headers="headers"
           :before-upload="handleBeforupload"
-          :limit="1"
           accept=".jpg,.jpeg,.png,.gif"
           >
           <img v-if="formData.mainImgUrl" :src="imgUrl" class="img">
@@ -85,10 +84,12 @@ export default {
           { required: true, message: '请输入商品名称', trigger: 'blur' }
         ],
         price: [
-          { required: true, message: '请输入商品价格', trigger: 'blur' }
+          { required: true, message: '请输入商品价格', trigger: 'blur' },
+          { type: 'number', message: '输入不合法，请输入正确的价格类型' }
         ],
         stock: [
-          { required: true, message: '请上传商品库存', trigger: 'blur' }
+          { required: true, message: '请上传商品库存', trigger: 'blur' },
+          { type: 'number', message: '输入不合法，请输入一个正整数' }
         ],
         category: [
           { required: true, message: '请选择商品分类', trigger: 'change' }
@@ -132,7 +133,7 @@ export default {
           }).then(res => {
             if (res.errcode === 0) {
               this.$message.success('添加成功')
-              this.$router.push('/manage/product')
+              this.$router.push('/product')
             } else {
               this.$message.error('添加失败')
             }

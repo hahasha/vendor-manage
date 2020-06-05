@@ -1,44 +1,44 @@
 <template>
   <div class="home-content">
-    <section class="data-collection">
+    <section class="data-collection" v-cloak>
       <header class="data-c-title">数据统计</header>
-      <el-row>
+      <el-row class="data-wrap">
         <el-col :span="4">
           <div class="data-list list-head list-head-day">当日数据：</div>
         </el-col>
         <el-col :span="4">
           <div class="data-list">
-            <span>1</span> 新增用户
+            <span>{{currentUserCount}}</span> 新增用户
           </div>
         </el-col>
         <el-col :span="4">
           <div class="data-list">
-            <span>0</span> 新增订单
+            <span>{{currentOrderCount}}</span> 新增订单
           </div>
         </el-col>
         <el-col :span="4">
           <div class="data-list">
-            <span>0</span> 新增管理员
+            <span>{{currentAdminCount}}</span> 新增管理员
           </div>
         </el-col>
       </el-row>
-      <el-row>
+      <el-row class="data-wrap">
         <el-col :span="4">
           <div class="data-list list-head list-head-all">总数据：</div>
         </el-col>
         <el-col :span="4">
           <div class="data-list">
-            <span>321316</span>注册用户
+            <span>{{userCount}}</span> 注册用户
           </div>
         </el-col>
         <el-col :span="4">
           <div class="data-list">
-            <span>42411</span>订单
+            <span>{{orderCount}}</span> 订单
           </div>
         </el-col>
         <el-col :span="4">
           <div class="data-list">
-            <span>87684</span>管理员
+            <span>{{adminCount}}</span> 管理员
           </div>
         </el-col>
       </el-row>
@@ -48,19 +48,104 @@
 </template>
 
 <script>
-import echarts from 'echarts/lib/echarts'
-import 'echarts/lib/chart/bar'
-import 'echarts/lib/chart/line'
-import 'echarts/lib/component/title'
-import 'echarts/lib/component/legend'
-import 'echarts/lib/component/tooltip'
-import 'echarts/lib/component/toolbox'
-import 'echarts/lib/component/markPoint'
+import { getUserCount, getAdminCount, getOrderCount, getRecentOrderCount, getRecentUserCount, getRecentAdminCount } from '@/api/api'
+import echarts from 'echarts'
+// import moment from 'moment'
+// import 'echarts/lib/chart/bar'
+// import 'echarts/lib/chart/line'
+// import 'echarts/lib/component/title'
+// import 'echarts/lib/component/legend'
+// import 'echarts/lib/component/tooltip'
+// import 'echarts/lib/component/toolbox'
+// import 'echarts/lib/component/markPoint'
+import { getDate } from '@/common/js/date'
+const RCENT_NUM = 7 // 获取最近7天的数据
 export default {
+  data () {
+    return {
+      userCount: 0, // 总用户数
+      currentUserCount: 0, // 当日新增用户数
+      adminCount: 0,
+      currentAdminCount: 0,
+      orderCount: 0,
+      currentOrderCount: 0,
+      recentUserArr: [], // 最近每天新增用户
+      recentAdminArr: [],
+      recentOrderArr: [],
+      currentDate: getDate(0), // 当天日期
+      dateArr: [] // 最近的日期数组
+    }
+  },
+  created () {
+    this.setDateArr()
+    this.getCount() // 获取当日数据
+    this.getCurrentCount() // 获取当日数据
+    this.getRecentCount()
+  },
   mounted () {
-    this.drawLine()
+    // this.drawLine()
   },
   methods: {
+    setDateArr () {
+      for (let i = RCENT_NUM - 1; i >= 0; i--) {
+        this.dateArr.push(getDate(-i))
+      }
+    },
+    getCount () {
+      getUserCount().then(res => {
+        if (res.errcode === 0) {
+          this.userCount = res.count
+        }
+      })
+      getOrderCount().then(res => {
+        if (res.errcode === 0) {
+          this.orderCount = res.count
+        }
+      })
+      getAdminCount().then(res => {
+        if (res.errcode === 0) {
+          this.adminCount = res.count
+        }
+      })
+    },
+    getCurrentCount () {
+      getOrderCount({
+        date: this.currentDate
+      }).then(res => {
+        if (res.errcode === 0) {
+          this.currentOrderCount = res.count
+        }
+      })
+      getAdminCount({
+        date: this.currentDate
+      }).then(res => {
+        if (res.errcode === 0) {
+          this.currentAdminCount = res.count
+        }
+      })
+      getUserCount({
+        date: this.currentDate
+      }).then(res => {
+        if (res.errcode === 0) {
+          this.currentUserCount = res.count
+        }
+      })
+    },
+    async getRecentCount () {
+      const orderRes = await getRecentOrderCount({ dateArr: this.dateArr })
+      const userRes = await getRecentUserCount({ dateArr: this.dateArr })
+      const adminRes = await getRecentAdminCount({ dateArr: this.dateArr })
+      if (orderRes.errcode === 0) {
+        this.recentOrderArr = orderRes.countArr
+      }
+      if (userRes.errcode === 0) {
+        this.recentUserArr = userRes.countArr
+      }
+      if (adminRes.errcode === 0) {
+        this.recentAdminArr = adminRes.countArr
+      }
+      this.drawLine()
+    },
     drawLine () {
       const myChart = echarts.init(document.getElementById('chart'))
       myChart.setOption({
@@ -75,7 +160,6 @@ export default {
         toolbox: {
           show: true,
           feature: {
-            // saveAsImage: {},
             dataZoom: {},
             dataView: {},
             magicType: {
@@ -87,22 +171,14 @@ export default {
         xAxis: {
           type: 'category',
           boundaryGap: false,
-          data: [
-            '2019-12-01',
-            '2019-12-02',
-            '2019-12-03',
-            '2019-12-04',
-            '2019-12-05',
-            '2019-12-06',
-            '2019-12-07'
-          ]
+          data: this.dateArr
         },
         yAxis: [
           {
             type: 'value',
             name: '用户',
             min: 0,
-            max: 200,
+            max: 20,
             position: 'left',
             axisLine: {
               lineStyle: {
@@ -117,7 +193,7 @@ export default {
             type: 'value',
             name: '订单',
             min: 0,
-            max: 200,
+            max: 20,
             position: 'right',
             axisLine: {
               lineStyle: {
@@ -133,7 +209,7 @@ export default {
           {
             name: '新注册用户',
             type: 'line',
-            data: [5, 20, 46, 50, 90, 200, 100],
+            data: this.recentUserArr,
             yAxisIndex: 1,
             markPoint: {
               data: [
@@ -151,7 +227,7 @@ export default {
           {
             name: '新增订单',
             type: 'line',
-            data: [10, 40, 56, 60, 80, 100, 120],
+            data: this.recentOrderArr,
             yAxisIndex: 1,
             markPoint: {
               data: [
@@ -169,7 +245,7 @@ export default {
           {
             name: '新增管理员',
             type: 'line',
-            data: [30, 60, 90, 120, 150, 160, 180],
+            data: this.recentAdminArr,
             yAxisIndex: 1,
             markPoint: {
               data: [
@@ -192,15 +268,19 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-.home-content {
-  .data-collection {
+[v-cloak]
+  display none
+.home-content
+  .data-collection
     padding: 0 20px
-    .data-c-title {
+    .data-c-title
       font-size: 30px
       text-align: center
-      margin: 26px 0 14px
-    }
-    .data-list {
+      margin-bottom: 20px
+    .data-wrap
+      display flex
+      justify-content center
+    .data-list
       height: 36px
       line-height: 36px
       margin-right: 20px
@@ -210,26 +290,18 @@ export default {
       background: #e5e9f2
       font-size: 14px
       color: #666
-    }
-    .data-list span {
+    .data-list span
       font-size: 26px
       color: #333
-    }
-    .list-head {
+    .list-head
       font-size: 22px
       color: #fff
-    }
-    .list-head-day {
+    .list-head-day
       background: #ff9800
-    }
-    .list-head-all {
+    .list-head-all
       background: #20a0ff
-    }
-  }
-  #chart {
+  #chart
     width: 90%
     height: 450px
     margin: 60px auto 0 auto
-  }
-}
 </style>

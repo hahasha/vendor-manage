@@ -1,90 +1,90 @@
 import Vue from 'vue'
 import store from '../store'
 import VueRouter from 'vue-router'
-import Manage from '../pages/manage'
-import Login from '../pages/login'
-import Category from '../pages/category'
-import Theme from '../pages/theme'
-import Product from '../pages/product'
-import AddCategory from '../pages/addCategory'
-import AddTheme from '../pages/addTheme'
-import AddProduct from '../pages/addProduct'
-import Illustration from '../pages/illustration'
-import Home from '../pages/home'
 
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/',
-    redirect: '/login'
-  },
-  {
-    path: '/manage',
-    component: Manage,
-    meta: {
-      requireAuth: true // 表示路由进入要登录
-    },
+    component: () => import('@/pages/manage'),
     children: [
       {
-        path: '',
+        path: '/',
         name: 'home',
-        component: Home,
-        meta: ['首页']
+        component: () => import('@/pages/home'),
+        meta: {
+          title: ['首页'],
+          requireAuth: true // 进入首页需验证
+        }
       },
       {
         path: 'category',
         name: 'category',
-        component: Category,
-        meta: ['分类管理', '分类列表']
+        component: () => import('@/pages/category'),
+        meta: {
+          title: ['分类管理', '分类列表']
+        }
       },
       {
         path: 'theme',
         name: 'theme',
-        component: Theme,
-        meta: ['专题管理', '专题列表']
+        component: () => import('@/pages/theme'),
+        meta: {
+          title: ['专题管理', '专题列表']
+        }
       },
       {
         path: 'product',
         name: 'product',
-        component: Product,
-        meta: ['商品管理', '商品列表']
+        component: () => import('@/pages/product'),
+        meta: {
+          title: ['商品管理', '商品列表']
+        }
       },
       {
         path: 'addCategory',
         name: 'addCategory',
-        component: AddCategory,
-        meta: ['分类管理', '添加分类']
+        component: () => import('@/pages/addCategory'),
+        meta: {
+          title: ['分类管理', '添加分类']
+        }
       },
       {
         path: 'addTheme',
         name: 'addTheme',
-        component: AddTheme,
-        meta: ['专题管理', '添加专题']
+        component: () => import('@/pages/addTheme'),
+        meta: {
+          title: ['专题管理', '添加专题']
+        }
       },
       {
         path: 'addProduct',
         name: 'addProduct',
-        component: AddProduct,
-        meta: ['商品管理', '添加商品']
+        component: () => import('@/pages/addProduct'),
+        meta: {
+          title: ['商品管理', '添加商品']
+        }
       },
       {
         path: 'illustration',
         name: 'illustration',
-        component: Illustration,
-        meta: ['说明']
+        component: () => import('@/pages/illustration'),
+        meta: {
+          title: ['说明']
+        }
       }
     ]
   },
   {
     path: '/login',
     name: 'login',
-    component: Login,
+    component: () => import('@/pages/login'),
     beforeEnter: (to, from, next) => {
       const token = store.state.token || localStorage.getItem('token')
       if (token) {
         next({
-          path: '/manage'
+          path: '/'
         })
       } else {
         next()

@@ -91,8 +91,6 @@ export default {
       }).then(res => {
         if (res.errcode === 0) {
           this.$message.success('修改成功')
-        } else {
-          this.$message.error('修改失败')
         }
       })
     },
@@ -130,8 +128,10 @@ export default {
         deleteCategory({
           id: row.id
         }).then(res => {
-          this.getCategories()
-          this.$message.success('删除成功')
+          if (res.errcode === 0) {
+            this.getCategories()
+            this.$message.success('删除成功')
+          }
         })
       }).catch(() => {})
     },

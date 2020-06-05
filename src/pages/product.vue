@@ -3,7 +3,6 @@
     <el-table
       ref="productTable"
       :data="productData"
-      v-loading="loading"
       >
       <el-table-column type="expand">
         <template v-slot="props">
@@ -167,11 +166,6 @@ export default {
       }
     }
   },
-  computed: {
-    loading () {
-      return !this.productData.length
-    }
-  },
   created () {
     this.getProducts()
     this.getCategories()
@@ -256,6 +250,7 @@ export default {
         }).then(res => {
           if (res.errcode === 0) {
             this.getProducts()
+            this.currentPage = 1
             this.$message.success('删除成功')
           }
         })
